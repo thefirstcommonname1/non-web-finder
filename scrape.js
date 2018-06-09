@@ -8,13 +8,31 @@ var path = require('path');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-hbs.registerHelper('break', function(data)) {
-
-}
+hbs.registerHelper('break', function(data) {
+	let i = data.indexOf("(");
+	if (i < 0) {
+		return new hbs.SafeString(data);
+	}
+	return new hbs.SafeString('<strong>' 
+	+ data.substring(2,i)
+	+ '</strong>'
+	+ '<br/>' 
+	+ data.substring(i,i+12) // Usually the phone number
+	+ '<br/>' 
+	+ data.substring(i + 12, data.length));
+})
 
 app.get('/', function (req, res) {
+	res.redirect('/manassass/1');
+});
+app.get('/:place/:number', function (req, res) {
 	let array = [];
-	request('https://www.yellowpages.com/search?search_terms=business&geo_location_terms=Manassas%2C%20VA', function (error, response, html) {
+	let number = req.params.number;
+	let place = req.params.place;
+	if (!place) place = "Manassas";
+	if (!number) number = 1;
+	let url = "https://www.yellowpages.com/search?search_terms=business&geo_location_terms=" + place + "%2C%20VA&page=" + number;
+	request(url, function (error, response, html) {
 	if (!error && response.statusCode == 200) {
 		var $ = cheerio.load(html);
 		$('div.info').each(function (i, element) {
@@ -26,7 +44,6 @@ app.get('/', function (req, res) {
 	res.render('index', {
 		list: array
 	});
-	console.log(array);
 	});
 	
 });

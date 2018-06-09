@@ -5,6 +5,7 @@ var app = express();
 var hbs = require('hbs');
 var path = require('path');
 
+var port = process.env.PORT || 3000;
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
@@ -48,6 +49,6 @@ app.get('/:place/:number', function (req, res) {
 	
 });
 
-app.listen(3000, function() {
+app.listen(port, function() {
 	console.log("Listening on port 3000");
 });

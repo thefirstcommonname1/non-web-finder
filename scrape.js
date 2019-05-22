@@ -4,6 +4,10 @@ var express = require('express');
 var app = express();
 var hbs = require('hbs');
 var path = require('path');
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 var port = process.env.PORT || 3000;
 app.set('views', path.join(__dirname, 'views'));
@@ -14,18 +18,31 @@ hbs.registerHelper('break', function(data) {
 	if (i < 0) {
 		return new hbs.SafeString(data);
 	}
-	return new hbs.SafeString('<strong>' 
-	+ data.substring(2,i)
+	let pattern = /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/;
+	//console.log(pattern.exec(data));
+	//console.log(data);
+	console.log(pattern.exec(data));
+	if (pattern.test(data) === true) {
+		number = pattern.exec(data);
+	} else {
+		number = data.substring(i, i+14);
+	}
+
+	return new hbs.SafeString('<strong>'
+	+ data.substring(4,i)
 	+ '</strong>'
-	+ '<br/>' 
-	+ data.substring(i,i+12) // Usually the phone number
-	+ '<br/>' 
-	+ data.substring(i + 12, data.length));
+	+ '<br/>'
+	+ '<span class="number">'
+	+ number //data.substring(i,i+12) // Usually the phone number
+	+ '</span>'
+	+ '<br/>'
+	+ data.substring(i + 14, data.length));
 })
 
 app.get('/', function (req, res) {
-	res.redirect('/manassass/1');
+	res.redirect('/manassass/3');
 });
+
 app.get('/:place/:number', function (req, res) {
 	let array = [];
 	let number = req.params.number;
@@ -46,7 +63,13 @@ app.get('/:place/:number', function (req, res) {
 		list: array
 	});
 	});
-	
+
+});
+
+app.post('/city', (req, res) => {
+	let city = req.body.city;
+	let page = req.body.page;
+	res.redirect(`${city}/${page}`);
 });
 
 app.listen(port, function() {
